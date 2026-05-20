@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Anahad (ASL Version)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0f;
+      color: #e0e0e0;
+      font-family: "Segoe UI", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #111118;
+      border-bottom: 1px solid #222;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header h1 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.02em;
+    }
+
+    header span {
+      font-size: 0.78rem;
+      color: #666;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 16px;
+      padding: 16px;
+      flex: 1;
+    }
+
+    .video-wrap {
+      position: relative;
+      background: #000;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #1e1e2e;
+    }
+
+    .video-wrap img {
+      width: 100%;
+      display: block;
+    }
+
+    .output-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .bar {
+      background: #111118;
+      border: 1px solid #1e1e2e;
+      border-radius: 8px;
+      padding: 10px 16px;
+    }
+
+    .bar label {
+      font-size: 0.7rem;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .bar .value {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: #00ffe0;
+      min-height: 28px;
+      word-break: break-all;
+    }
+
+    #sentence-bar .value {
+      color: #fff;
+      font-size: 1.1rem;
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card {
+      background: #111118;
+      border: 1px solid #1e1e2e;
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .card h3 {
+      font-size: 0.72rem;
+      color: #444;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 12px;
+    }
+
+    .mode-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .badge.auto {
+      background: #1a2a1a;
+      color: #4ade80;
+      border: 1px solid #4ade80;
+    }
+
+    .badge.static {
+      background: #1a2a2a;
+      color: #00ffe0;
+      border: 1px solid #00ffe0;
+    }
+
+    .badge.dynamic {
+      background: #1a1a2a;
+      color: #818cf8;
+      border: 1px solid #818cf8;
+    }
+
+    .tracker-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #1a1a1a;
+      font-size: 0.82rem;
+    }
+
+    .tracker-row:last-child { border-bottom: none; }
+    .tracker-label { color: #555; }
+    .tracker-val { font-weight: 600; }
+    .tracker-val.active { color: #4ade80; }
+    .tracker-val.inactive { color: #333; }
+    .tracker-conf { color: #444; font-size: 0.72rem; margin-left: 6px; }
+
+    .stab-wrap {
+      margin-top: 8px;
+    }
+
+    .stab-label {
+      font-size: 0.7rem;
+      color: #555;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .stab-track {
+      background: #1a1a1a;
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .stab-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00c87a, #00ffe0);
+      border-radius: 4px;
+      transition: width 0.15s ease;
+      width: 0%;
+    }
+
+    .confirmed-tag {
+      font-size: 0.68rem;
+      color: #00ffe0;
+      font-weight: 700;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .confirmed-tag.show { opacity: 1; }
+
+    .motion-pill {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .motion-pill.STATIC { background: #1a2a2a; color: #00ffe0; }
+    .motion-pill.DYNAMIC { background: #1a1a2a; color: #818cf8; }
+    .motion-pill.UNKNOWN { background: #1a1a1a; color: #333; }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #222;
+      background: #161620;
+      color: #ccc;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      user-select: none;
+      min-height: 48px;
+    }
+
+    .btn:hover { background: #1e1e30; border-color: #444; color: #fff; }
+    .btn:active { transform: scale(0.96); opacity: 0.85; }
+    .btn.mode { grid-column: span 2; background: #0f1f0f; color: #4ade80; border-color: #4ade80; }
+    .btn.mode:hover { background: #1a2f1a; }
+    .btn.danger { background: #1f0f0f; color: #f87171; border-color: #f87171; }
+    .btn.danger:hover { background: #2f1515; }
+    .btn.space { grid-column: span 2; background: #0f0f1f; color: #818cf8; border-color: #818cf8; }
+
+    .tap-pad {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: #0d0d14;
+      border-top: 1px solid #1e1e2e;
+      padding: 10px 12px 20px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .tap-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 12px 6px;
+      border-radius: 10px;
+      border: 1px solid #222;
+      background: #161620;
+      color: #ccc;
+      font-size: 1.3rem;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      user-select: none;
+      transition: all 0.1s;
+    }
+
+    .tap-btn span {
+      font-size: 0.6rem;
+      color: #555;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .tap-btn:active { transform: scale(0.93); background: #1e1e30; }
+    .tap-btn.mode-btn { border-color: #4ade80; color: #4ade80; background: #0f1f0f; }
+    .tap-btn.reset-btn { border-color: #f87171; color: #f87171; background: #1f0f0f; }
+    .tap-btn.space-btn { border-color: #818cf8; color: #818cf8; background: #0f0f1f; }
+    .tap-btn.back-btn { border-color: #fbbf24; color: #fbbf24; background: #1f1a0f; }
+
+    @media (hover: none) and (pointer: coarse) {
+      .tap-pad { display: grid; }
+      body { padding-bottom: 110px; }
+    }
+
+    @media (max-width: 768px) {
+      .layout { grid-template-columns: 1fr; }
+      .tap-pad { display: grid; }
+      body { padding-bottom: 110px; }
+      header h1 { font-size: 0.9rem; }
+    }
+
+    .fps-chip {
+      font-size: 0.7rem;
+      color: #444;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #4ade80;
+      display: inline-block;
+      margin-right: 6px;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Anahad (ASL Version)</h1>
+  <span><span class="dot"></span>Live</span>
+</header>
+
+<div class="layout">
+  <div>
+    <div class="video-wrap">
+      <img src="/video_feed" alt="Live Camera Feed"/>
+    </div>
+
+    <div class="output-bars">
+      <div class="bar">
+        <label>Spelling (current word)</label>
+        <div class="value" id="spelling">-</div>
+      </div>
+      <div class="bar" id="sentence-bar">
+        <label>Sentence</label>
+        <div class="value" id="sentence">-</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="card">
+      <h3>Mode</h3>
+      <div class="mode-row">
+        <span style="font-size:0.85rem; color:#888">Active Pipeline</span>
+        <span class="badge auto" id="mode-badge">AUTO</span>
+      </div>
+      <div class="mode-row">
+        <span style="font-size:0.78rem; color:#555">Decision</span>
+        <span style="font-size:0.78rem; color:#888" id="active-label">None</span>
+      </div>
+      <div class="mode-row">
+        <span style="font-size:0.78rem; color:#555">FPS</span>
+        <span class="fps-chip" id="fps">-</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Live Tracker</h3>
+      <div class="tracker-row">
+        <span class="tracker-label">Dynamic</span>
+        <span>
+          <span class="tracker-val inactive" id="d-label">--</span>
+          <span class="tracker-conf" id="d-conf">(0.00)</span>
+        </span>
+      </div>
+      <div class="tracker-row">
+        <span class="tracker-label">Static</span>
+        <span>
+          <span class="tracker-val inactive" id="s-label">--</span>
+          <span class="tracker-conf" id="s-conf">(0.00)</span>
+        </span>
+      </div>
+      <div class="tracker-row">
+        <span class="tracker-label">Motion</span>
+        <span class="motion-pill UNKNOWN" id="motion-pill">UNKNOWN</span>
+      </div>
+      <div class="stab-wrap">
+        <div class="stab-label">
+          <span id="stab-text">Stability: 0/4</span>
+          <span class="confirmed-tag" id="confirmed-tag">CONFIRMED</span>
+        </div>
+        <div class="stab-track">
+          <div class="stab-fill" id="stab-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Controls</h3>
+      <div class="controls">
+        <button class="btn mode" onclick="ctrl('mode')">Switch Mode</button>
+        <button class="btn" onclick="ctrl('backspace')">Backspace</button>
+        <button class="btn danger" onclick="ctrl('reset')">Reset All</button>
+        <button class="btn space" onclick="ctrl('space')">Confirm Word</button>
+      </div>
+    </div>
+
+    <div class="card" style="display:none;" id="shortcuts-card">
+      <h3>Keyboard Shortcuts</h3>
+      <div style="font-size:0.75rem; color:#555; line-height:2;">
+        <div><kbd style="background:#1a1a1a;padding:2px 6px;border-radius:4px;color:#888">M</kbd> &nbsp; Switch Mode</div>
+        <div><kbd style="background:#1a1a1a;padding:2px 6px;border-radius:4px;color:#888">R</kbd> &nbsp; Reset All</div>
+        <div><kbd style="background:#1a1a1a;padding:2px 6px;border-radius:4px;color:#888">Space</kbd> &nbsp; Confirm Word</div>
+        <div><kbd style="background:#1a1a1a;padding:2px 6px;border-radius:4px;color:#888">Backspace</kbd> &nbsp; Backspace</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tap-pad" id="tap-pad">
+  <button class="tap-btn mode-btn" data-action="mode">
+    M <span>Mode</span>
+  </button>
+  <button class="tap-btn back-btn" data-action="backspace">
+    B <span>Delete</span>
+  </button>
+  <button class="tap-btn reset-btn" data-action="reset">
+    R <span>Reset</span>
+  </button>
+  <button class="tap-btn space-btn" data-action="space">
+    W <span>Word</span>
+  </button>
+</div>
+
+<script>
+  const S_FRAMES = 4;
+
+  const isTouch = window.matchMedia("(hover: none) and (pointer: coarse)").matches
+               || window.innerWidth <= 768;
+
+  if (!isTouch) {
+    document.getElementById("shortcuts-card").style.display = "block";
+  }
+
+  async function pollState() {
+    try {
+      const res = await fetch("/state");
+      const s = await res.json();
+
+      document.getElementById("spelling").textContent = s.current_word || "-";
+      document.getElementById("sentence").textContent = (s.sentence || "").trim() || "-";
+
+      const badge = document.getElementById("mode-badge");
+      badge.textContent = s.mode || "AUTO";
+      badge.className = "badge " + (s.mode || "AUTO").toLowerCase();
+
+      document.getElementById("active-label").textContent = s.active || "None";
+      document.getElementById("fps").textContent = (s.fps || 0) + " fps";
+
+      const dConf = Number(s.d_conf || 0);
+      const sConf = Number(s.s_conf || 0);
+
+      const dLabel = document.getElementById("d-label");
+      dLabel.textContent = s.d_label || "--";
+      dLabel.className = "tracker-val " + (dConf >= 0.75 ? "active" : "inactive");
+      document.getElementById("d-conf").textContent = `(${dConf.toFixed(2)})`;
+
+      const sLabel = document.getElementById("s-label");
+      sLabel.textContent = s.s_label || "--";
+      sLabel.className = "tracker-val " + (sConf >= 0.55 ? "active" : "inactive");
+      document.getElementById("s-conf").textContent = `(${sConf.toFixed(2)})`;
+
+      const motion = s.motion_mode || "UNKNOWN";
+      const pill = document.getElementById("motion-pill");
+      pill.textContent = motion;
+      pill.className = "motion-pill " + motion;
+
+      const count = Number(s.s_count || 0);
+      const pct = Math.min(count / S_FRAMES * 100, 100);
+      document.getElementById("stab-fill").style.width = pct + "%";
+      document.getElementById("stab-text").textContent = `Stability: ${count}/${S_FRAMES}`;
+
+      document.getElementById("confirmed-tag").classList.toggle("show", !!s.s_confirmed);
+    } catch (e) {}
+  }
+
+  let lastCtrl = 0;
+
+  async function ctrl(action) {
+    const now = Date.now();
+    if (now - lastCtrl < 300) return;
+    lastCtrl = now;
+
+    try {
+      await fetch("/control", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action })
+      });
+    } catch (e) {}
+  }
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "m" || e.key === "M") ctrl("mode");
+    else if (e.key === "r" || e.key === "R") ctrl("reset");
+    else if (e.key === " ") {
+      e.preventDefault();
+      ctrl("space");
+    }
+    else if (e.key === "Backspace") ctrl("backspace");
+  });
+
+  document.querySelectorAll(".tap-btn").forEach(btn => {
+    btn.addEventListener("touchstart", e => {
+      e.preventDefault();
+      const action = btn.getAttribute("data-action");
+      if (action) ctrl(action);
+    }, { passive: false });
+  });
+
+  setInterval(pollState, 150);
+  pollState();
+</script>
+</body>
+</html>
