@@ -118,6 +118,6 @@ best_model = tuner.get_best_models(num_models=1)[0]
 best_hp = tuner.get_best_hyperparameters(num_trials=1)[0]
 print(best_hp.values)
 
-best_model.save("final tuned gru model.h5")
-joblib.dump(scaler, "final tuned scaler.pkl")
-joblib.dump(encoder, "final tuned encoder.pkl")
+best_model.save("tuned gru model.h5")
+joblib.dump(scaler, "tuned scaler.pkl")
+joblib.dump(encoder, "tuned encoder.pkl")
